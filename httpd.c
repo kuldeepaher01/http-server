@@ -13,7 +13,7 @@
 struct sHttpRequest{
     char method[8];
     char url[128];
-}
+};
 typedef struct sHttpRequest httpreq;
 
 /* global */
@@ -65,10 +65,51 @@ void cli_conn(int s, int c){
     return;
 }
 
+/* returns 0 on error or returns http request*/
+httpreq *parse_http(char *str){
+    httpreq *req;
+    char *p;
+
+    req = calloc(1, sizeof(httpreq));
+    for(p=str; p && *p != ' '; p++);
+    if(*p == ' ')
+         *p = 0;
+    else{
+        error = "parse_http() NOSPACE error";
+        free(req);
+        return 0;
+    }
+    strncpy(req->method, str, 7);
+    for(str = ++p; p && *p != ' '; p++);
+    if(*p == ' ')
+         *p = 0;
+    else{
+        error = "parse_http() 2ndSPACE error";
+        free(req);
+        return 0;
+    }
+    strncpy(req->url, str, 127);
+    return req;
+}
+
+
 int main(int argc, char const *argv[])
 {
     int s, c;
     char *port;
+    char *template;
+    httpreq *req;
+    char buff[512];
+    template = "GET /sdfsdfd HTTP/1.1\n"
+    "host: fahfjkh.net:8184\n"
+    "jafjafh";
+    memset(buff, 0, 512);
+    strncpy(buff, template, 511)
+    req = parse_http(template);
+    printf("Method: '%s' \n URL: '%s'\n", req->method, req->url);
+    free(req);
+    return 0;
+
     if(argc  < 2){
         fprintf(stderr, "Usage: %s <listening port> \n", argv[0]);
         return -1;

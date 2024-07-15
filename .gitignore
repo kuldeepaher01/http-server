@@ -1,6 +1,13 @@
 # Prerequisites
 *.d
+# Ignore all files without extension
+*
+!*/
+!*.*
 
+# Exceptions: Don't ignore .gitignore and Makefile
+!.gitignore
+!Makefile
 # Object files
 *.o
 *.ko
