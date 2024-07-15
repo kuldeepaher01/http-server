@@ -61,10 +61,6 @@ int cli_accept(int s){
     return c;
 }
 
-void cli_conn(int s, int c){
-    return;
-}
-
 /* returns 0 on error or returns http request*/
 httpreq *parse_http(char *str){
     httpreq *req;
@@ -91,24 +87,48 @@ httpreq *parse_http(char *str){
     strncpy(req->url, str, 127);
     return req;
 }
+/* return 0 on erro or return the data*/
+char *cli_read(int c){
+    static char buff[512];
+    memset(buff, 0, 511);
+    if(read(c, buff, 511)<0){
+        error = "read() error";
+        return 0;
+    }
+    else    
+        return buff;
+}
+
+void cli_conn(int s, int c){
+    httpreq *req;
+    char *p;
+
+    p = cli_read(c);
+    if(!p){
+        fprintf(stderr, "%s\n", error);
+        close(c);
+        return;
+    }
+    req = parse_http(p);
+    if(!req){
+        fprintf(stderr, "%s\n", error);
+        close(c);
+        return;
+    }
+    printf("'%s'\n: '%s'\n", req->method, req->url);
+    free(req);
+    close(c);
+    return;
+}
+
 
 
 int main(int argc, char const *argv[])
 {
     int s, c;
     char *port;
-    char *template;
     httpreq *req;
-    char buff[512];
-    template = "GET /sdfsdfd HTTP/1.1\n"
-    "host: fahfjkh.net:8184\n"
-    "jafjafh";
-    memset(buff, 0, 512);
-    strncpy(buff, template, 511)
-    req = parse_http(template);
-    printf("Method: '%s' \n URL: '%s'\n", req->method, req->url);
-    free(req);
-    return 0;
+    
 
     if(argc  < 2){
         fprintf(stderr, "Usage: %s <listening port> \n", argv[0]);
